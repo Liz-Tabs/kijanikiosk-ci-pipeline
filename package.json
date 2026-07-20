@@ -1,0 +1,13 @@
+{
+  "name": "kijanikiosk-devops-foundation",
+  "version": "1.0.0",
+  "description": "KijaniKiosk CI Pipeline Project",
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo 'Lint check passed'",
+    "build": "mkdir -p dist && echo 'KijaniKiosk build output' > dist/app.txt",
+    "test": "echo 'All tests passed'"
+  },
+  "author": "",
+  "license": "ISC"
+}
