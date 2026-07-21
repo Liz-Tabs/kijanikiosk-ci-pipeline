@@ -1,10 +1,6 @@
 pipeline {
 
-    agent {
-        docker {
-            image 'node:18-alpine'
-        }
-    }
+agent any
 
     environment {
         APP_NAME = 'kijanikiosk-devops-foundation'
