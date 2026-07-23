@@ -6,8 +6,11 @@
   "scripts": {
     "lint": "echo 'Lint check passed'",
     "build": "mkdir -p dist && echo 'KijaniKiosk build output' > dist/app.txt",
-    "test": "echo 'All tests passed'"
+    "test": "jest"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.4.2"
+  }
 }
