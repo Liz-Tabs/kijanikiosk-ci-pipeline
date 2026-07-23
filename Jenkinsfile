@@ -82,6 +82,8 @@ EOF
                         echo "=================="
 
                         npm publish
+
+                        rm -f .npmrc
                     '''
                 }
             }
@@ -89,6 +91,10 @@ EOF
     }
 
     post {
+
+        always {
+            echo "Pipeline finished."
+        }
 
         success {
             echo "Pipeline completed successfully."
