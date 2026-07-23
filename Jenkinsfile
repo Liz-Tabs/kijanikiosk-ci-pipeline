@@ -87,11 +87,6 @@ pipeline {
 
     post {
 
-        always {
-            junit allowEmptyResults: true, testResults: '**/junit*.xml'
-            cleanWs()
-        }
-
         success {
             echo "Pipeline completed successfully."
         }
