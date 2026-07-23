@@ -66,20 +66,18 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                    VERSION=$(node -p "require('./package.json').version")-$(git rev-parse --short HEAD)
-                    npm version $VERSION --no-git-tag-version
+VERSION=$(node -p "require('./package.json').version")-$(git rev-parse --short HEAD)
+npm version $VERSION --no-git-tag-version
 
-                    cat > .npmrc <<EOF
-                    registry=${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/
-                    //192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:_auth=$(printf "%s:%s" "$NEXUS_USER" "$NEXUS_PASS" | base64 -w0)
-                    email=jenkins@example.com
-                    always-auth=true
-                    EOF
+AUTH=$(printf "%s:%s" "$NEXUS_USER" "$NEXUS_PASS" | base64 -w0)
 
-                    npm publish
+printf "registry=%s/repository/%s/\n//192.168.100.3:8081/repository/%s/:_auth=%s\nemail=jenkins@example.com\nalways-auth=true\n" \
+"$NEXUS_URL" "$NEXUS_REPOSITORY" "$NEXUS_REPOSITORY" "$AUTH" > .npmrc
 
-                    rm -f .npmrc
-                    '''
+npm publish
+
+rm -f .npmrc
+'''
                 }
             }
         }
