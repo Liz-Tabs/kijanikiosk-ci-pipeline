@@ -2,7 +2,7 @@ pipeline {
 
     agent {
         docker {
-            image 'node:20.20.2'
+            image 'node:18.20.8'
             reuseNode true
         }
     }
