@@ -65,14 +65,18 @@ pipeline {
                         passwordVariable: 'NEXUS_PASS'
                     )
                 ]) {
-                    sh '''
+                    
+sh '''
 VERSION=$(node -p "require('./package.json').version")-$(git rev-parse --short HEAD)
 npm version $VERSION --no-git-tag-version
 
-AUTH=$(printf "%s:%s" "$NEXUS_USER" "$NEXUS_PASS" | base64 -w0)
-
-printf "registry=%s/repository/%s/\n//192.168.100.3:8081/repository/%s/:_auth=%s\nemail=jenkins@example.com\nalways-auth=true\n" \
-"$NEXUS_URL" "$NEXUS_REPOSITORY" "$NEXUS_REPOSITORY" "$AUTH" > .npmrc
+cat > .npmrc <<EOF
+registry=${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/
+always-auth=true
+//192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:username=$NEXUS_USER
+//192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:_password=$(printf "%s" "$NEXUS_PASS" | base64 -w0)
+//192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:email=jenkins@example.com
+EOF
 
 npm publish
 
