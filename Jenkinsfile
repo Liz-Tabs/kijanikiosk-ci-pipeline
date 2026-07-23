@@ -1,6 +1,11 @@
 pipeline {
 
-agent any
+    agent {
+        docker {
+            image 'node:20.20.2'
+            reuseNode true
+        }
+    }
 
     environment {
         APP_NAME = 'kijanikiosk-devops-foundation'
@@ -10,9 +15,14 @@ agent any
 
     stages {
 
-        stage('Lint') {
+        stage('Install') {
             steps {
                 sh 'npm install'
+            }
+        }
+
+        stage('Lint') {
+            steps {
                 sh 'npm run lint'
             }
         }
@@ -37,7 +47,6 @@ agent any
                         sh 'npm audit --audit-level=high || true'
                     }
                 }
-
             }
         }
 
@@ -46,12 +55,40 @@ agent any
                 archiveArtifacts artifacts: 'dist/**', fingerprint: true
             }
         }
+
+        stage('Publish') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'nexus-credentials',
+                        usernameVariable: 'NEXUS_USER',
+                        passwordVariable: 'NEXUS_PASS'
+                    )
+                ]) {
+                    sh '''
+                    VERSION=$(node -p "require('./package.json').version")-$(git rev-parse --short HEAD)
+                    npm version $VERSION --no-git-tag-version
+
+                    cat > .npmrc <<EOF
+                    registry=${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/
+                    //192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:_auth=$(printf "%s:%s" "$NEXUS_USER" "$NEXUS_PASS" | base64 -w0)
+                    email=jenkins@example.com
+                    always-auth=true
+                    EOF
+
+                    npm publish
+
+                    rm -f .npmrc
+                    '''
+                }
+            }
+        }
     }
 
     post {
 
         always {
-            echo "Cleaning workspace..."
+            junit allowEmptyResults: true, testResults: '**/junit*.xml'
             cleanWs()
         }
 
