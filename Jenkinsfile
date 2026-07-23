@@ -58,17 +58,18 @@ pipeline {
 
         stage('Publish') {
             steps {
-                
-withCredentials([usernamePassword(
-    credentialsId: 'nexus-credentials',
-    usernameVariable: 'NEXUS_USER',
-    passwordVariable: 'NEXUS_PASS'
-)]) {
-    sh '''
-VERSION=$(node -p "require('./package.json').version")-$(git rev-parse --short HEAD)
-npm version "$VERSION" --no-git-tag-version
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'nexus-credentials',
+                        usernameVariable: 'NEXUS_USER',
+                        passwordVariable: 'NEXUS_PASS'
+                    )
+                ]) {
+                    sh '''
+                        VERSION=$(node -p "require('./package.json').version")-$(git rev-parse --short HEAD)
+                        npm version "$VERSION" --no-git-tag-version
 
-cat > .npmrc <<EOF
+                        cat > .npmrc <<EOF
 registry=${NEXUS_URL}/repository/${NEXUS_REPOSITORY}/
 always-auth=true
 //192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:username=$NEXUS_USER
@@ -76,13 +77,13 @@ always-auth=true
 //192.168.100.3:8081/repository/${NEXUS_REPOSITORY}/:email=jenkins@example.com
 EOF
 
-echo "===== .npmrc ====="
-sed 's/_password=.*/_password=********/' .npmrc
-echo "=================="
+                        echo "===== .npmrc ====="
+                        sed 's/_password=.*/_password=********/' .npmrc
+                        echo "=================="
 
-npm publish
-'''
-}               }
+                        npm publish
+                    '''
+                }
             }
         }
     }
